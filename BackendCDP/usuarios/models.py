@@ -1,33 +1,55 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-# Usamos el modelo de usuario actual para los campos de auditoría
-User = get_user_model()
+
+class UsuarioManager(BaseUserManager):
+    def create_user(self, usuario, contrasena=None, **extra_fields):
+        if not usuario:
+            raise ValueError("El campo usuario es obligatorio")
+        user = self.model(usuario=usuario, **extra_fields)
+        user.set_password(contrasena)  # Hashea la contraseña
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, usuario, contrasena=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(usuario, contrasena, **extra_fields)
+
 
 class TipoUsuario(models.Model):
     descripcion = models.CharField(max_length=100)
-
-    # Auditoría
-    created_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tipousuario_created')
-    update_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tipousuario_updated')
-    deleted_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tipousuario_deleted')
 
     def __str__(self):
         return self.descripcion
 
 
-class Usuario(models.Model):
+class Usuario(AbstractBaseUser, PermissionsMixin):
     nombre = models.CharField(max_length=100)
     identificacion = models.CharField(max_length=50)
     usuario = models.CharField(max_length=50, unique=True)
-    contrasena = models.CharField(max_length=128)
-    
-    tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE, related_name='usuarios')
+
+    tipo_usuario = models.ForeignKey(TipoUsuario, on_delete=models.CASCADE, related_name="usuarios", null=True, blank=True)
+
+    # Campos obligatorios para Django
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
     # Auditoría
-    created_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='usuario_created')
-    update_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='usuario_updated')
-    deleted_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='usuario_deleted')
+    created_user = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="usuario_created"
+    )
+    update_user = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="usuario_updated"
+    )
+    deleted_user = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="usuario_deleted"
+    )
+
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = "usuario"
+    REQUIRED_FIELDS = ["nombre", "identificacion"]
 
     def __str__(self):
         return self.nombre

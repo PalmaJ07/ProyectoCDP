@@ -23,3 +23,20 @@ user.save()
 | `/api/usuarios/tipo_usuarios/{id}/` | GET, PUT, PATCH, DELETE | Ver, actualizar o eliminar tipo de usuario por ID |
 | `/api/usuarios/auth/`               | POST                    | Autenticación con usuario y contraseña            |
 
+http://127.0.0.1:8000/api/procedimientos/aranceles/?page=1&tipo=Laboratorio&search=hemograma ->Paginacion 
+http://127.0.0.1:8000/api/procedimientos/aranceles/all/?search=consulta -> Sin paginacion
+
+POST /api/procedimientos/facturas/crear/
+{
+  "id_paciente": 1,
+  "fecha": "2025-01-01",
+  "total": 150.00,
+  "detalles": [
+    {"id_arancel": 3},
+    {"id_arancel": 5}
+  ]
+}
+
+
+ /api/procedimientos/facturas/
+
