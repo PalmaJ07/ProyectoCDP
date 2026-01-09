@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>Reporte de Facturas</h2>
+
+{% for factura in facturas %}
+    <h4>Factura #{{ factura.id }} - {{ factura.fecha }}</h4>
+    <p>Total: {{ factura.total }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Arancel</th>
+                <th>Tipo</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in factura.detalles.all %}
+            <tr>
+                <td>{{ d.arancel_descripcion }}</td>
+                <td>{{ d.arancel_tipo }}</td>
+                <td>{{ d.arancel_precio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+{% endfor %}
+
+</body>
+</html>
