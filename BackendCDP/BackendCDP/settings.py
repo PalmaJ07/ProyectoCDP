@@ -64,7 +64,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "BackendCDP.pagination.CustomPagination",
     "PAGE_SIZE":7,  # cantidad de doctores por página
     "DEFAULT_FILTER_BACKENDS": [
     "django_filters.rest_framework.DjangoFilterBackend"
@@ -105,8 +105,8 @@ WSGI_APPLICATION = 'BackendCDP.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "db_proyectocdp",
-        "USER": "root",
+        "NAME": "desarrolloCDP",
+        "USER": "palma",
         "PASSWORD": "",
         "HOST": "localhost",
         "PORT": "3306",

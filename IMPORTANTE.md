@@ -7,7 +7,9 @@ password: LaVie!sBe!!a+
 
 <!-- Proceso para realizar cambio de contrase;a forzado -->
 python manage.py shell
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 user = User.objects.get(username='tu_usuario')
 user.set_password('nueva_contraseña_segura')
