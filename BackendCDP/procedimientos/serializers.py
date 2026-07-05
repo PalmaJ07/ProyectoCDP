@@ -35,7 +35,39 @@ class ArancelSerializer(serializers.ModelSerializer):
 # ---------------------------------------------
 # Factura
 # ---------------------------------------------
+# class FacturaSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Factura
+#         fields = [
+#             "id",
+#             "id_paciente",
+#             "fecha",
+#             "total",
+#             "created_user",
+#             "update_user",
+#             "deleted_user",
+#         ]
+#         read_only_fields = ["created_user", "update_user", "deleted_user"]
+
+#     def create(self, validated_data):
+#         request = self.context.get("request")
+#         if request and request.user.is_authenticated:
+#             validated_data["created_user"] = request.user
+#         return super().create(validated_data)
+
+#     def update(self, instance, validated_data):
+#         request = self.context.get("request")
+#         if request and request.user.is_authenticated:
+#             validated_data["update_user"] = request.user
+#         return super().update(instance, validated_data)
+
 class FacturaSerializer(serializers.ModelSerializer):
+    total = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        read_only=True  # 👈 clave
+    )
+
     class Meta:
         model = Factura
         fields = [

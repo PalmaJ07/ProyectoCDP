@@ -20,7 +20,7 @@ class Arancel(models.Model):
 class Factura(models.Model):
     id_paciente = models.ForeignKey(Paciente,on_delete=models.CASCADE,related_name="facturas")
     fecha = models.DateField()
-    total = models.DecimalField(max_digits=12, decimal_places=2)
+    total = models.DecimalField(max_digits=12, decimal_places=2,null=True,blank=True)  # Se calculará automáticamente al crear la factura
 
     # Auditoría
     created_user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True,related_name='factura_created')

@@ -1,9 +1,11 @@
+from urllib import request
+
 from rest_framework import generics, filters, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Arancel, Factura, DetalleFactura
 from .serializers import ArancelSerializer, DetalleFacturaSerializer, FacturaSerializer,FacturaDetalleCompletoSerializer
 
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, get_object_or_404
 from .utils import filtrar_facturas_por_fecha
 
 from django.http import HttpResponse
@@ -75,13 +77,14 @@ class CrearFacturaAPIView(views.APIView):
 
     def post(self, request):
         data = request.data
+        print(type(request.data))
+        print(request.data)
+        total = 0
 
-        # 1. Validar datos de factura
         factura_serializer = FacturaSerializer(
             data={
                 "id_paciente": data.get("id_paciente"),
-                "fecha": data.get("fecha"),
-                "total": data.get("total")
+                "fecha": data.get("fecha")
             },
             context={"request": request}
         )
@@ -91,23 +94,31 @@ class CrearFacturaAPIView(views.APIView):
 
         factura = factura_serializer.save()
 
-        # 2. Crear los detalles
         detalles_data = data.get("detalles", [])
         detalles_creados = []
 
         for item in detalles_data:
-            arancel = Arancel.objects.get(id=item["id_arancel"])
+            arancel = get_object_or_404(Arancel, id=item["id_arancel"])
+
+            precio = item.get("precio", arancel.precio)
+            total += precio
 
             detalle = DetalleFactura.objects.create(
                 factura=factura,
                 id_arancel=arancel,
                 arancel_descripcion=arancel.descripcion,
                 arancel_tipo=arancel.tipo,
-                arancel_precio=arancel.precio,
+                arancel_precio=precio,
                 created_user=request.user
             )
 
             detalles_creados.append(DetalleFacturaSerializer(detalle).data)
+
+
+        factura.total = total
+        factura.save()
+
+
 
         return Response({
             "factura": FacturaSerializer(factura).data,
