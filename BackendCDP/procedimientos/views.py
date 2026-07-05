@@ -16,6 +16,7 @@ from openpyxl import Workbook
 from .renderers import BinaryRenderer
 from django.utils.dateparse import parse_date
 import openpyxl
+from django.db.models import Sum
 
 class FacturaBaseView(GenericAPIView):
 
@@ -116,12 +117,41 @@ class CrearFacturaAPIView(views.APIView):
 # ---------------------------------------------
 # API #4 — Listar facturas con su desglose
 # ---------------------------------------------
+# class FacturaListAPIView(FacturaBaseView, generics.ListAPIView):
+#     serializer_class = FacturaDetalleCompletoSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get_queryset(self):
+#         return self.get_filtered_queryset(self.request)
+
 class FacturaListAPIView(FacturaBaseView, generics.ListAPIView):
     serializer_class = FacturaDetalleCompletoSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return self.get_filtered_queryset(self.request)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # 🔥 SUMA TOTAL DE TODAS LAS FACTURAS (sin paginación)
+        total_general = queryset.aggregate(total=Sum('total'))['total'] or 0
+
+        # 🔹 Aplicar paginación normalmente
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+
+            # 🔥 Agregar el total general a la respuesta
+            response.data['total_general'] = total_general
+            return response
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            "results": serializer.data,
+            "total_general": total_general
+        })
 
 class FacturaPDFAPIView(APIView):
     permission_classes = [IsAuthenticated]
