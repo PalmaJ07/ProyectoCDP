@@ -77,8 +77,6 @@ class CrearFacturaAPIView(views.APIView):
 
     def post(self, request):
         data = request.data
-        print(type(request.data))
-        print(request.data)
         total = 0
 
         factura_serializer = FacturaSerializer(

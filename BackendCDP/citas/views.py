@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from openpyxl import Workbook
 from rest_framework.generics import GenericAPIView
+from django.db.models import Sum
 
 class CitaBaseFilterView(GenericAPIView):
     filter_backends = [
@@ -61,12 +62,35 @@ class CitaDeleteAPIView(generics.DestroyAPIView):
         cita.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+# class CitaListAPIView(CitaBaseFilterView, generics.ListAPIView):
+#     serializer_class = CitaSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get_queryset(self):
+#         return self.get_filtered_queryset(self.request)
+
 class CitaListAPIView(CitaBaseFilterView, generics.ListAPIView):
     serializer_class = CitaSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return self.get_filtered_queryset(self.request)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # 🔥 calcular total
+        total_precio = queryset.aggregate(
+            total=Sum('precio_final')
+        )['total'] or 0
+
+        # 🔥 respuesta normal paginada
+        response = super().list(request, *args, **kwargs)
+
+        # 🔥 agregar total a la respuesta
+        response.data['total_precio_final'] = total_precio
+
+        return response
     
 class CitaPDFAPIView(CitaBaseFilterView, APIView):
     permission_classes = [IsAuthenticated]
@@ -98,6 +122,9 @@ class CitaExcelAPIView(CitaBaseFilterView, APIView):
             "Paciente",
             "Doctor",
             "Especialidad",
+            "Arancel Precio",
+            "Precio Final",
+            "Debito Fijo",            
             "Fecha",
             "Estado",
             "Estado Pago"
@@ -108,6 +135,9 @@ class CitaExcelAPIView(CitaBaseFilterView, APIView):
                 c.paciente_nombre,
                 c.doctor_nombre,
                 c.arancel_descripcion,
+                c.arancel_precio,
+                c.precio_final,
+                c.debito_fijo,
                 c.fecha_hora.strftime("%d/%m/%Y %H:%M"),
                 c.estado,
                 c.estado_pago

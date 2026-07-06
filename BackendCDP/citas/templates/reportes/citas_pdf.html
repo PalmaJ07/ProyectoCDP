@@ -19,6 +19,9 @@
             <th>Paciente</th>
             <th>Doctor</th>
             <th>Especialidad</th>
+            <th>Precio Arancel </th>
+            <th>Precio Final</th>
+            <th>Debito Fijo</th>
             <th>Fecha</th>
             <th>Estado</th>
             <th>Pago</th>
@@ -30,6 +33,9 @@
             <td>{{ c.paciente_nombre }}</td>
             <td>{{ c.doctor_nombre }}</td>
             <td>{{ c.arancel_descripcion }}</td>
+            <td>{{ c.arancel_precio }}</td>
+            <td>{{ c.precio_final }}</td>
+            <td>{{ c.debito_fijo }}</td>
             <td>{{ c.fecha_hora|date:"d/m/Y H:i" }}</td>
             <td>{{ c.estado }}</td>
             <td>{{ c.estado_pago }}</td>
