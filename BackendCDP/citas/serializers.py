@@ -60,7 +60,8 @@ class CitaSerializer(serializers.ModelSerializer):
 
         #arancel = validated_data.get("arancel")    
         arancel = validated_data.get("arancel", instance.arancel.id)  # Mantener el arancel actual si no se proporciona uno nuevo
-        detalle_actual = instance.factura.id
+        detalle_actual = validated_data.get("factura",instance.factura)
+        detalle_actual = detalle_actual.id if detalle_actual else None
         #detalle_actual = validated_data.get("factura")
 
         print("detalle_actual:", detalle_actual)
